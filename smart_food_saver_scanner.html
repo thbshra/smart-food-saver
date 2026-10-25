@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#176b4d">
+<title>Smart Food Saver</title>
+<style>
+:root{--g:#176b4d;--g2:#23845f;--mint:#e8f5ee;--bg:#f5f8f5;--txt:#18352a;--muted:#6d7d74;--line:#e2eae4;--orange:#fff0d8;--red:#fde7e5;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(135deg,#14583f,#27825e);color:#fff;padding:24px 18px 27px;border-radius:0 0 24px 24px}
+.head{display:flex;align-items:center;gap:12px}.logo{width:45px;height:45px;border-radius:14px;background:#ffffff24;display:grid;place-items:center;font-size:25px}h1{font-size:22px;margin:0}header p{margin:5px 0 0;color:#d9f0e3;font-size:13px}
+.wrap{max-width:900px;margin:auto;padding:16px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:20px 0 12px}.section-title h2{font-size:18px;margin:0}.small{font-size:12px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px}.stat .emoji{font-size:22px}.stat strong{display:block;font-size:25px;margin:8px 0 3px}.stat span{font-size:12px;color:var(--muted)}
+.form-grid{display:grid;grid-template-columns:1fr;gap:12px}label{font-size:13px;font-weight:650;display:block;margin-bottom:6px}input,select{width:100%;padding:12px;border:1px solid #d5e1d8;border-radius:11px;font:inherit;font-size:15px;background:#fff;color:var(--txt)}input:focus,select:focus{outline:2px solid #a5d8bb;border-color:var(--g)}
+button{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:700;cursor:pointer}.primary{background:var(--g);color:#fff;width:100%;margin-top:4px}.secondary{background:var(--mint);color:var(--g)}.danger{background:var(--red);color:#9e3028}.scan-grid{display:grid;grid-template-columns:1fr;gap:10px}.scan-card{background:#f7fbf8;border:1px solid var(--line);border-radius:14px;padding:13px}.scan-card h3{font-size:15px;margin:0 0 5px}.scan-card p{font-size:12px;color:var(--muted);line-height:1.45;margin:0 0 10px}.scan-card button{width:100%}.notice{padding:12px;border-radius:12px;background:var(--orange);color:#754d0c;font-size:13px;line-height:1.5;margin-bottom:12px}.statusline{font-size:12px;color:var(--muted);margin-top:8px;min-height:16px;line-height:1.4}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}.filters button{font-size:12px;padding:8px 11px;background:#edf2ee;color:#506258}.filters button.active{background:var(--g);color:#fff}
+.food-list{display:grid;gap:10px}.food{border:1px solid var(--line);border-radius:15px;padding:13px;display:flex;gap:12px;align-items:flex-start;background:#fff}.food-icon{font-size:27px;background:var(--mint);border-radius:12px;padding:9px}.food-main{flex:1;min-width:0}.food-title{font-weight:750;overflow-wrap:anywhere}.food-meta{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}.pill{display:inline-block;border-radius:999px;padding:5px 8px;font-size:11px;font-weight:750;margin-top:7px}.fresh{background:var(--mint);color:#176b4d}.soon{background:var(--orange);color:#895300}.expired{background:var(--red);color:#a02c27}.food-actions{display:flex;flex-direction:column;gap:6px}.food-actions button{font-size:11px;padding:8px}.empty{text-align:center;padding:26px 12px;color:var(--muted);font-size:14px}.progress{height:9px;background:#eaf0eb;border-radius:20px;overflow:hidden;margin-top:10px}.progress div{height:100%;background:var(--g2);width:0}
+footer{text-align:center;padding:22px 12px 35px;font-size:12px;color:var(--muted)}
+/* camera modal */
+.modal{position:fixed;inset:0;z-index:50;background:#07140eeb;display:none;flex-direction:column;padding:calc(12px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));color:#fff}.modal.open{display:flex}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.modal-head h2{font-size:18px;margin:0}.close{background:#ffffff20;color:#fff}.camera-box{position:relative;flex:1;min-height:200px;max-height:62vh;background:#101a14;border-radius:18px;overflow:hidden;display:grid;place-items:center}.camera-box video{width:100%;height:100%;object-fit:cover}.camera-hint{font-size:13px;color:#d5e2da;text-align:center;line-height:1.5;margin:12px 0}.scan-line{position:absolute;left:8%;right:8%;top:50%;height:2px;background:#80f5ae;box-shadow:0 0 10px #80f5ae}.modal-actions{display:flex;gap:8px;flex-wrap:wrap}.modal-actions button{flex:1}.modal .secondary{background:#dff4e7}.modal-status{font-size:13px;line-height:1.45;min-height:20px;margin:10px 0}.ocr-result{font-size:12px;color:#e0ebe4;max-height:90px;overflow:auto;white-space:pre-wrap}
+@media(min-width:620px){.wrap{padding:22px}.stats{grid-template-columns:repeat(4,minmax(0,1fr))}.form-grid{grid-template-columns:1fr 1fr}.form-grid .full{grid-column:1/-1}.scan-grid{grid-template-columns:1fr 1fr}.panel{padding:20px}}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="logo">🥬</div><div><h1>Smart Food Saver</h1><p>Scan food. Track freshness. Reduce waste.</p></div></div></header>
+<main class="wrap">
+  <div class="section-title"><h2>Your food dashboard</h2><span class="small" id="todayLabel"></span></div>
+  <section class="stats">
+    <div class="stat"><div class="emoji">🧺</div><strong id="totalCount">0</strong><span>Total food items</span></div>
+    <div class="stat"><div class="emoji">⏳</div><strong id="soonCount">0</strong><span>Expiring in 3 days</span></div>
+    <div class="stat"><div class="emoji">⚠️</div><strong id="expiredCount">0</strong><span>Past expiry date</span></div>
+    <div class="stat"><div class="emoji">🌱</div><strong id="savedCount">0</strong><span>Marked as used</span></div>
+  </section>
+
+  <div class="section-title"><h2>📷 Quick scan</h2><span class="small">Use your iPhone camera</span></div>
+  <section class="panel">
+    <div class="notice"><strong>Scanner note:</strong> Barcode lookup can fill product details when the product exists in Open Food Facts. Expiry dates are usually not stored in barcodes, so the OCR scanner reads printed text and asks you to confirm the detected date.</div>
+    <div class="scan-grid">
+      <div class="scan-card"><h3>🏷️ Scan barcode</h3><p>Scan a product barcode to look up its name and category online.</p><button class="secondary" id="startBarcode">Open barcode scanner</button><div class="statusline" id="barcodeStatus"></div></div>
+      <div class="scan-card"><h3>📅 Scan expiry text</h3><p>Point the camera at text such as EXP 12/2026 or Best Before 25/12/2026.</p><button class="secondary" id="startOcr">Read expiry date (OCR)</button><div class="statusline" id="ocrStatus"></div></div>
+    </div>
+  </section>
+
+  <div class="section-title"><h2>➕ Add food item</h2><span class="small">Review scan results before saving</span></div>
+  <section class="panel">
+    <form id="foodForm" class="form-grid">
+      <div><label for="foodName">Food name *</label><input id="foodName" maxlength="60" placeholder="e.g. Milk" required></div>
+      <div><label for="category">Category</label><select id="category"><option>Fruit & vegetables</option><option>Dairy</option><option>Meat & fish</option><option>Bakery</option><option>Grains & pantry</option><option>Leftovers</option><option>Other</option></select></div>
+      <div><label for="quantity">Quantity *</label><input id="quantity" maxlength="30" placeholder="e.g. 1 litre, 4 pieces" required></div>
+      <div><label for="expiry">Expiry / use-by date *</label><input id="expiry" type="date" required></div>
+      <div class="full"><button class="primary" type="submit">＋ Save food item</button></div>
+    </form>
+  </section>
+
+  <div class="section-title"><h2>🔔 Expiry reminders</h2></div><div id="reminderArea"></div>
+  <div class="section-title"><h2>🧾 Your food inventory</h2><span class="small" id="listCount">0 items</span></div>
+  <div class="filters" id="filters"><button class="active" data-filter="all">All items</button><button data-filter="soon">Expiring soon</button><button data-filter="expired">Expired</button><button data-filter="used">Used / saved</button></div>
+  <section class="food-list" id="foodList"></section>
+  <div class="section-title"><h2>📊 Waste reduction summary</h2></div>
+  <section class="panel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><strong id="usedSummary">0 items used</strong><div class="small">Items marked as used before waste</div></div><strong id="usedPercent">0%</strong></div><div class="progress"><div id="usedBar"></div></div><p class="small" id="summaryText">Add food items and mark them as used to track your progress.</p></section>
+  <div class="notice">💡 Food safety tip: Check package instructions. This scanner is a reminder tool, not a food-safety test. Confirm OCR dates yourself and do not eat food that may be unsafe.</div>
+</main>
+<footer>Smart Food Saver · Small steps, less food waste 🌍<br>Food entries are saved in this browser on this device.</footer>
+
+<div class="modal" id="cameraModal" role="dialog" aria-modal="true" aria-labelledby="cameraTitle">
+  <div class="modal-head"><h2 id="cameraTitle">Camera scanner</h2><button class="close" id="closeCamera">Close ✕</button></div>
+  <div class="camera-box"><video id="cameraVideo" autoplay playsinline muted></video><div class="scan-line" id="scanLine"></div></div>
+  <div class="camera-hint" id="cameraHint">Allow camera access when Safari asks. Hold the barcode or expiry text steady in view.</div>
+  <div class="modal-status" id="cameraStatus">Starting camera…</div>
+  <div class="ocr-result" id="ocrText"></div>
+  <div class="modal-actions"><button class="secondary" id="captureOcr" style="display:none">Capture and read text</button><button class="secondary" id="switchCamera">Switch camera</button><button class="close" id="stopCamera">Stop camera</button></div>
+</div>
+
+<!-- Real browser libraries: loaded from CDN. Internet is needed for these libraries and product lookup. -->
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+const STORAGE_KEY="smartFoodSaverItems_v2";
+let items=[];let currentFilter="all";let cameraStream=null;let activeMode=null;let codeReader=null;let scanControls=null;let facingMode="environment";let scanning=false;let ocrBusy=false;
+try{items=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(!Array.isArray(items))items=[];}catch(e){items=[];}
+const $=id=>document.getElementById(id);
+const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;};
+const daysUntil=date=>Math.round((new Date(date+"T00:00:00")-new Date(todayISO()+"T00:00:00"))/86400000);
+const statusOf=i=>i.used?"used":daysUntil(i.expiry)<0?"expired":daysUntil(i.expiry)<=3?"soon":"fresh";
+const save=()=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(items));}catch(e){alert("Could not save. Check browser storage settings.");}};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dateText=d=>new Date(d+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+const statusText=i=>{if(i.used)return"Marked as used";let d=daysUntil(i.expiry);if(d<0)return`Expired ${Math.abs(d)} day${Math.abs(d)===1?"":"s"} ago`;if(d===0)return"Expires today";if(d===1)return"Expires tomorrow";if(d<=3)return`Expires in ${d} days`;return`${d} days left`;};
+const iconFor=c=>({"Fruit & vegetables":"🥦","Dairy":"🥛","Meat & fish":"🍗","Bakery":"🍞","Grains & pantry":"🌾","Leftovers":"🍱","Other":"🥫"}[c]||"🥫");
+function render(){
+ const active=items.filter(i=>!i.used),soon=active.filter(i=>statusOf(i)==="soon"),expired=active.filter(i=>statusOf(i)==="expired"),used=items.filter(i=>i.used);
+ $("totalCount").textContent=items.length;$("soonCount").textContent=soon.length;$("expiredCount").textContent=expired.length;$("savedCount").textContent=used.length;$("todayLabel").textContent=new Date().toLocaleDateString(undefined,{day:"numeric",month:"short"});
+ const reminders=[...expired.map(item=>({item,kind:"expired"})),...soon.map(item=>({item,kind:"soon"}))];
+ $("reminderArea").innerHTML=reminders.length?`<section class="panel"><div class="food-list">${reminders.slice(0,5).map(({item,kind})=>`<div class="food"><div class="food-icon">${iconFor(item.category)}</div><div class="food-main"><div class="food-title">${esc(item.name)}</div><div class="food-meta">${esc(item.quantity)} · ${kind==="expired"?"Check immediately":"Expiry: "+dateText(item.expiry)}</div><span class="pill ${kind}">${statusText(item)}</span></div></div>`).join("")}</div>${reminders.length>5?`<p class="small">And ${reminders.length-5} more reminder(s) below.</p>`:""}</section>`:`<section class="panel empty">🎉 No urgent expiry reminders. Add food items to track them.</section>`;
+ let shown=items.filter(i=>currentFilter==="all"||statusOf(i)===currentFilter).sort((a,b)=>a.expiry.localeCompare(b.expiry));
+ $("listCount").textContent=`${shown.length} item${shown.length===1?"":"s"}`;
+ $("foodList").innerHTML=shown.length?shown.map(i=>{let s=statusOf(i),pc=s==="expired"?"expired":s==="soon"?"soon":"fresh";return`<article class="food"><div class="food-icon">${iconFor(i.category)}</div><div class="food-main"><div class="food-title">${esc(i.name)}</div><div class="food-meta">${esc(i.quantity)} · ${esc(i.category)}<br>Expiry date: ${dateText(i.expiry)}${i.barcode?`<br>Barcode: ${esc(i.barcode)}`:""}</div><span class="pill ${pc}">${statusText(i)}</span></div><div class="food-actions">${!i.used?`<button class="secondary" data-use="${i.id}">Mark used</button>`:`<button class="secondary" data-unuse="${i.id}">Undo</button>`}<button class="danger" data-delete="${i.id}">Delete</button></div></article>`;}).join(""):`<section class="panel empty">No items in this view yet.<br>Add a food item using the form above.</section>`;
+ let pct=items.length?Math.round(used.length/items.length*100):0;$("usedSummary").textContent=`${used.length} item${used.length===1?"":"s"} used`;$("usedPercent").textContent=pct+"%";$("usedBar").style.width=pct+"%";$("summaryText").textContent=items.length?`${used.length} of ${items.length} tracked item(s) marked as used. Keep checking your inventory to reduce avoidable waste.`:"Add food items and mark them as used to track your progress.";
+ document.querySelectorAll("#filters button").forEach(b=>b.classList.toggle("active",b.dataset.filter===currentFilter));
+}
+$("foodForm").addEventListener("submit",e=>{e.preventDefault();let name=$("foodName").value.trim(),quantity=$("quantity").value.trim(),expiry=$("expiry").value;if(!name||!quantity||!expiry){alert("Please complete all required fields.");return;}items.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),name,quantity,category:$("category").value,expiry,used:false,created:todayISO(),barcode:$("foodName").dataset.barcode||""});save();$("foodForm").reset();delete $("foodName").dataset.barcode;currentFilter="all";render();});
+$("filters").addEventListener("click",e=>{let b=e.target.closest("button[data-filter]");if(b){currentFilter=b.dataset.filter;render();}});
+$("foodList").addEventListener("click",e=>{let b=e.target.closest("button");if(!b)return;if(b.dataset.use)items=items.map(i=>i.id===b.dataset.use?{...i,used:true,usedDate:todayISO()}:i);else if(b.dataset.unuse)items=items.map(i=>i.id===b.dataset.unuse?{...i,used:false,usedDate:null}:i);else if(b.dataset.delete){let i=items.find(x=>x.id===b.dataset.delete);if(!i||!confirm(`Delete "${i.name}"?`))return;items=items.filter(x=>x.id!==b.dataset.delete);}save();render();});
+
+function setStatus(id,msg){$(id).textContent=msg;}
+async function openCamera(mode){
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert("Camera access is not available in this browser. Open the website using an HTTPS link in Safari.");return;}
+ await stopCamera(false);activeMode=mode;scanning=true;$("cameraTitle").textContent=mode==="barcode"?"Scan product barcode":"Scan expiry date text";$("cameraStatus").textContent="Requesting camera permission…";$("ocrText").textContent="";$("captureOcr").style.display=mode==="ocr"?"block":"none";$("scanLine").style.display=mode==="barcode"?"block":"none";$("cameraModal").classList.add("open");
+ try{
+  cameraStream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facingMode},width:{ideal:1280},height:{ideal:720}}});
+  $("cameraVideo").srcObject=cameraStream;await $("cameraVideo").play();$("cameraStatus").textContent=mode==="barcode"?"Hold the barcode inside the camera view…":"Place the printed expiry date in view, then tap “Capture and read text”.";
+  if(mode==="barcode")startBarcodeDecoding();
+ }catch(err){$("cameraStatus").textContent="Camera could not start: "+(err.name==="NotAllowedError"?"allow camera access in Safari settings and try again":err.message||err);scanning=false;}
+}
+async function stopCamera(closeModal=true){
+ scanning=false;ocrBusy=false;
+ try{if(scanControls&&scanControls.stop)scanControls.stop();}catch(e){}scanControls=null;
+ try{if(codeReader&&codeReader.reset)codeReader.reset();}catch(e){}codeReader=null;
+ if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
+ if($("cameraVideo"))$("cameraVideo").srcObject=null;
+ if(closeModal)$("cameraModal").classList.remove("open");
+}
+async function startBarcodeDecoding(){
+ if(!window.ZXingBrowser){$("cameraStatus").textContent="Barcode library did not load. Check internet connection and reload the page.";return;}
+ try{
+  codeReader=new ZXingBrowser.BrowserMultiFormatReader();
+  scanControls=await codeReader.decodeFromVideoDevice(undefined,$("cameraVideo"),async(result,err,controls)=>{
+   if(result&&scanning){scanning=false;controls.stop();scanControls=null;let code=result.getText();$("cameraStatus").textContent="Barcode found: "+code+" — looking up product…";await lookupProduct(code);}
+  });
+ }catch(err){$("cameraStatus").textContent="Could not start barcode reader: "+(err.message||err);}
+}
+async function lookupProduct(code){
+ setStatus("barcodeStatus","Looking up barcode "+code+"…");
+ try{
+  const response=await fetch("https://world.openfoodfacts.org/api/v2/product/"+encodeURIComponent(code)+".json?fields=product_name,product_name_en,categories_tags,brands,quantity");
+  if(!response.ok)throw new Error("Product database request failed.");
+  const data=await response.json();
+  if(data.status!==1||!data.product){setStatus("barcodeStatus","Barcode scanned, but product was not found. Enter the name manually.");$("cameraStatus").textContent="No product found for "+code+". You can close the scanner and enter the name manually.";await stopCamera(false);return;}
+  const p=data.product;const name=p.product_name_en||p.product_name||p.brands||"";
+  if(name)$("foodName").value=name;
+  if(p.quantity)$("quantity").value=p.quantity;
+  const cats=(p.categories_tags||[]).join(" ").toLowerCase();
+  if(/dairy|milk|cheese|yogurt/.test(cats))$("category").value="Dairy";
+  else if(/fruit|vegetable/.test(cats))$("category").value="Fruit & vegetables";
+  else if(/meat|fish|chicken/.test(cats))$("category").value="Meat & fish";
+  else if(/bread|bakery/.test(cats))$("category").value="Bakery";
+  else if(/cereal|grain|pasta|rice|pantry/.test(cats))$("category").value="Grains & pantry";
+  else $("category").value="Other";
+  $("foodName").dataset.barcode=code;
+  setStatus("barcodeStatus","Found: "+(name||"Product")+" · Review details and enter expiry date.");
+  $("cameraStatus").textContent="Product details filled in. Please check them and scan the expiry date separately.";
+  await stopCamera(false);
+  $("foodName").scrollIntoView({behavior:"smooth",block:"center"});
+ }catch(err){setStatus("barcodeStatus","Lookup failed. Check internet and enter details manually.");$("cameraStatus").textContent="Barcode was read, but online lookup failed. Check internet and try again.";}
+}
+function parseExpiryDate(text){
+ const normalized=text.toUpperCase().replace(/[.,]/g,"/").replace(/\s+/g," ");
+ const now=new Date();const yearNow=now.getFullYear();
+ // Prefer dates close to expiry-related words; try dd/mm/yyyy, yyyy-mm-dd, dd/mm/yy and month-year.
+ const patterns=[
+  /\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/,
+  /\b(\d{1,2})[-/](\d{1,2})[-/](20\d{2})\b/,
+  /\b(\d{1,2})[-/](\d{1,2})[-/](\d{2})\b/,
+  /\b(0?[1-9]|1[0-2])[-/](20\d{2})\b/,
+  /\b(0?[1-9]|1[0-2])[-/](\d{2})\b/
+ ];
+ for(let idx=0;idx<patterns.length;idx++){
+  const m=normalized.match(patterns[idx]);if(!m)continue;let y,mo,d;
+  if(idx===0){y=+m[1];mo=+m[2];d=+m[3];}
+  else if(idx===1||idx===2){d=+m[1];mo=+m[2];y=+m[3];if(y<100)y+=2000;}
+  else {mo=+m[1];y=+m[2];if(y<100)y+=2000;d=new Date(y,mo,0).getDate();}
+  const date=new Date(y,mo-1,d);
+  if(date.getFullYear()===y&&date.getMonth()===mo-1&&date.getDate()===d&&y>=2000&&y<=2100&&mo>=1&&mo<=12&&d>=1&&d<=31)return `${y}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+ }
+ // Recognize month names, e.g. DEC 2026 or 25 DEC 2026
+ const months={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+ let m=normalized.match(/\b(\d{1,2})?\s*(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|SEPT|OCT|NOV|DEC)[A-Z]*[\s/-]+(20\d{2})\b/);
+ if(m){let d=+(m[1]||new Date(+m[3],months[m[2]],0).getDate()),mo=months[m[2]==="SEPT"?"SEP":m[2]],y=+m[3];return `${y}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`;}
+ return null;
+}
+$("captureOcr").addEventListener("click",async()=>{
+ if(ocrBusy)return;const video=$("cameraVideo");if(!video.videoWidth){$("cameraStatus").textContent="Wait for the camera preview, then try again.";return;}
+ if(!window.Tesseract){$("cameraStatus").textContent="OCR library did not load. Check internet and reload.";return;}
+ ocrBusy=true;$("captureOcr").disabled=true;$("cameraStatus").textContent="Reading text from image… This may take a little while.";
+ try{
+  const canvas=document.createElement("canvas");canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext("2d").drawImage(video,0,0,canvas.width,canvas.height);
+  const result=await Tesseract.recognize(canvas,"eng",{logger:m=>{if(m.status==="recognizing text")$("cameraStatus").textContent="Reading text… "+Math.round((m.progress||0)*100)+"%";}});
+  const text=result.data.text||"";$("ocrText").textContent="Detected text:\n"+(text.trim()||"(No readable text found)");
+  const date=parseExpiryDate(text);
+  if(date){$("expiry").value=date;setStatus("ocrStatus","Possible date found: "+dateText(date)+" — please verify it on the package.");$("cameraStatus").textContent="Possible date detected: "+dateText(date)+". Check the expiry date field and confirm it matches the package.";}
+  else{$("cameraStatus").textContent="Text was read, but no supported date format was recognized. Check the detected text and enter the date manually.";}
+ }catch(err){$("cameraStatus").textContent="Could not read the image: "+(err.message||err);}
+ finally{ocrBusy=false;$("captureOcr").disabled=false;}
+});
+$("startBarcode").addEventListener("click",()=>openCamera("barcode"));
+$("startOcr").addEventListener("click",()=>openCamera("ocr"));
+$("closeCamera").addEventListener("click",()=>stopCamera(true));
+$("stopCamera").addEventListener("click",()=>stopCamera(true));
+$("switchCamera").addEventListener("click",async()=>{facingMode=facingMode==="environment"?"user":"environment";const mode=activeMode;await stopCamera(false);await openCamera(mode);});
+$("expiry").min=todayISO();
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&cameraStream)stopCamera(true);});
+render();
+</script>
+</body>
+</html>
